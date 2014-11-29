@@ -1,26 +1,48 @@
 (function(){
+	'use strict';
 
 	/*
 	* Tick
 	*/
 
 	function createTick(){
-		var collection = [];
+		var collection = [],
+			loop = _createAnimationLoop(),
+			requestId;
 
 		/*
 		* Private
 		*/
 
-		(function animloop(){
-		  requestAnimFrame(animloop);
-		  _render();
-		})();
+		function _createAnimationLoop(){
+			var once = false;
 
+			return function(){
+				if(once) return;		
+
+				(function _animloop(){
+					requestId = requestAnimFrame(_animloop);
+					_render();
+				})();
+
+				once = true;
+			}
+		}
 
 		function _render(){
 			for (var i = 0; i < collection.length; i++) {
 				collection[i].callback();
 			};
+		}
+
+		function _checkCollection(){
+			if(collection.length > 0 && collection.length < 2){
+				loop();
+
+			}else if(collection.length === 0){
+				cancelAnimFrame(requestId);
+				loop = _createAnimationLoop();
+			}
 		}
 
 		/*
@@ -30,10 +52,12 @@
 			add:function(){
 				var index = collection.indexOf(arguments[0]);
 				if (index === -1) collection.push(arguments[0]);
+				_checkCollection();
 			},
 			remove:function(){
 				var index = collection.indexOf(arguments[0]);
 				if (index > -1) collection.splice(index, 1);
+				_checkCollection();
 			}
 		}
 	}
@@ -95,10 +119,10 @@
 		function _update(){
 			x = animationX();
 			y = animationY();
-			_setPosition(x,y);			
+			_displayPostion(x,y);			
 		}
 
-		function _setPosition(x,y){
+		function _displayPostion(x,y){
 			$el.css({
 				'transform':'translateX('+x+'px) translateY('+y+'px) translateZ(0px)'
 			})
@@ -146,6 +170,14 @@
 
 		that.goto = _goto;
 
+		that.getX = function(){
+			return x;
+		};
+		
+		that.getY = function(){
+			return y;
+		};
+
 		return that;
 	}
 
@@ -174,7 +206,7 @@
 
         function _spreadOut(){
         	ifChildrenHasTouched = _createCheckChildrenTouched();
-        	
+
         	_loopCollection(function(el, i){
         		var time = 6000 + i * 500;
 
@@ -229,11 +261,13 @@
 		elementCollection.setSelf(elementCollection);
 
 		elementCollection.setCallback(function(){
-			elementCollection.spreadOut();
+			setTimeout(function(){
+				elementCollection.spreadOut();
+			},3000)
 		});
 
 		elementCollection.init();
-		elementCollection.spreadOut();
+		elementCollection.spreadOut(); 
 
 
 	});
