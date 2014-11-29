@@ -28,7 +28,8 @@
 		*/
 		return {
 			add:function(){
-				collection.push(arguments[0]);
+				var index = collection.indexOf(arguments[0]);
+				if (index === -1) collection.push(arguments[0]);
 			},
 			remove:function(){
 				var index = collection.indexOf(arguments[0]);
@@ -56,8 +57,8 @@
 		var that = createWithParent(arguments[0]),
 			tick = tickSingleton.getInstance(),
 			frameRate = 60,
-			x = 0,
-			y = 0,
+			x = Math.random() * window.innerWidth,
+			y = Math.random() * window.innerHeight,
 			animationX,
 			animationY,
 			identifier = {
@@ -69,8 +70,9 @@
 			'width':'20px',
 			'height':'20px',
 			'position':'absolute',
-			'transform':'translateX(0px) translateY(0px)'
-		})
+			'border-radius':'100%',
+			'transform':'translateX('+x+') translateY('+y+')'
+		}) 
 
 		$('body').append($el);
 
@@ -93,16 +95,24 @@
 		function _update(){
 			x = animationX();
 			y = animationY();
+			_setPosition(x,y);			
+		}
+
+		function _setPosition(x,y){
 			$el.css({
 				'transform':'translateX('+x+'px) translateY('+y+'px) translateZ(0px)'
 			})
 		}
 
-		function _animationConstructor(easeAnimation, start,end,duration,callback){
+		function _reset(){
+			_stopAnimation();
+			that.parent.touch();
+		}
+
+		function _animationConstructor(easeAnimation,start,end,duration,callback){
 			var time = 0;
 
 			return function(){
-
 				if(time === duration) callback();
 				time += 1;
 
@@ -111,13 +121,23 @@
 		}
 
 		function _goto(endX,endY,time){
-			
+			var ease = _randomEase();
 			time = parseInt(time / frameRate) || 60;
 
-			animationX = _animationConstructor(Ease.easeInOutCubic, x, endX - x, time, _stopAnimation);
-			animationY = _animationConstructor(Ease.easeInOutCubic, y, endY - y, time, _stopAnimation);
+			animationX = _animationConstructor(ease(), x, endX - x, time, _reset);
+			animationY = _animationConstructor(ease(), y, endY - y, time, _reset);
 			
 			_startAnimation();
+		}
+
+		function _randomEase(){
+			var toggle = Math.random() < 0.5 ? true : false;
+			return function (){
+				toggle = !toggle;
+				if (toggle) return Ease.easeInOutQuart;
+				return Ease.easeInOutSine;
+			}
+				
 		}
 		
 		/*
@@ -132,28 +152,48 @@
 
 	function createElementCollection() {
 		var self,
+			ifChildrenHasTouched,
+			numberOfChildren = 20,
+			callback = {},
 			collection = [];
 
 		/*
 		* Private
 		*/
 		function _createElements(){
-			for (var i = 0; i < 10; i++) {
+			for (var i = 0; i < numberOfChildren; i++) {
 				collection.push(createAnimationObject(self));
 			};
 		}
 
 		function _loopCollection(callback) {
             for (var i = 0; i < collection.length; i++) {
-                callback(collection[i]);
+                callback(collection[i], i);
             };
         }
 
-        setInterval(function(){
-        	_loopCollection(function(el){
-        		el.goto(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 3000);
-        	});
-        },1000);
+        function _spreadOut(){
+        	ifChildrenHasTouched = _createCheckChildrenTouched();
+        	
+        	_loopCollection(function(el, i){
+        		var time = 6000 + i * 500;
+
+	    		el.goto(Math.random() * window.innerWidth, Math.random() * window.innerHeight, time);
+	    		
+	    	});
+        }
+
+        function _createCheckChildrenTouched(){
+        	var count = 0;
+        	return function(){
+        		if(count === collection.length){
+        			setTimeout(function(){
+        				callback();
+        			},1000)
+        		}
+        		count += 1;
+        	}
+        }
 
 		/*
 		* Public
@@ -164,18 +204,39 @@
 			},
 			init:function(){
 				_createElements();
+				_spreadOut();
 			},
 			getSiblings:function(){
 				return collection;
-			}
+			},
+			touch:function(){
+				ifChildrenHasTouched();
+			},
+			setCallback:function(func){
+				callback = func;
+			},
+			spreadOut: _spreadOut,
 		}
 	}; 
 
 
-	var elementCollection = createElementCollection();
-		elementCollection.setSelf(elementCollection);
-		elementCollection.init();
+	
 
+	$(document).ready(function(){
+
+		var elementCollection = createElementCollection();
+
+		elementCollection.setSelf(elementCollection);
+
+		elementCollection.setCallback(function(){
+			elementCollection.spreadOut();
+		});
+
+		elementCollection.init();
+		elementCollection.spreadOut();
+
+
+	});
 
 
 
