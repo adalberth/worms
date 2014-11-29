@@ -38,7 +38,6 @@
 		function _checkCollection(){
 			if(collection.length > 0 && collection.length < 2){
 				loop();
-
 			}else if(collection.length === 0){
 				cancelAnimFrame(requestId);
 				loop = _createAnimationLoop();
@@ -64,6 +63,31 @@
 
 	var tickSingleton = stupid.createSingleton(createTick);
 
+
+	/*
+	* Document Elements
+	*/
+
+	function createDocument(){
+		var $body = $('body'),
+			$window = $('window'),
+			$document = $('document');
+
+		return {
+			getBody:function(){
+				return $body;
+			},
+			getWindow:function(){
+				return $window;
+			},
+			getDocument:function(){
+				return $document;
+			},
+		}
+	}
+
+	var documentSingleton = stupid.createSingleton(createDocument);
+
 	/*
 	* Objects
 	*/
@@ -79,7 +103,6 @@
 
 	function createAnimationObject(){
 		var that = createWithParent(arguments[0]),
-			tick = tickSingleton.getInstance(),
 			frameRate = 60,
 			x = Math.random() * window.innerWidth,
 			y = Math.random() * window.innerHeight,
@@ -89,6 +112,7 @@
 				callback: _render
 			};
 		
+		// Create Display Element
 		var $el = $('<div />').css({
 			'background-color':'black',
 			'width':'20px',
@@ -98,7 +122,7 @@
 			'transform':'translateX('+x+') translateY('+y+')'
 		}) 
 
-		$('body').append($el);
+		documentSingleton.getInstance().getBody().append($el);
 
 		/*
 		* Private
@@ -109,11 +133,11 @@
 		}
 
 		function _startAnimation(){
-			tick.add(identifier);
+			tickSingleton.getInstance().add(identifier);
 		}
 
 		function _stopAnimation(){
-			tick.remove(identifier);
+			tickSingleton.getInstance().remove(identifier);
 		}
 
 		function _update(){
@@ -173,7 +197,7 @@
 		that.getX = function(){
 			return x;
 		};
-		
+
 		that.getY = function(){
 			return y;
 		};
