@@ -93,7 +93,7 @@
      */
 
     function createAnimationObject() {
-        var that = { parent: arguments[0]},
+        var that = {parent: arguments[0]},
             frameRate = 60,
             x = Math.random() * window.innerWidth,
             y = Math.random() * window.innerHeight,
