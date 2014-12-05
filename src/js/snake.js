@@ -305,7 +305,7 @@
 					y: pos.top //$el.position().top
 				}
 			};
-
+gs
 			that.setPosition = function(x,y) {
 				// $el.css({
 				// 	"transform":"translateX("+x+"px) translateY("+y+"px) translateZ(0px)"
@@ -317,7 +317,7 @@
 			that.setOpacity = function(value){
 				// $el.css({
 				// 	"opacity": value
-				// });
+				// }); 
 				el.style["opacity"] = value;
 			}
 
@@ -325,11 +325,12 @@
 		}
 
 
+		console.log("Ohh noo - snakes!!!");
 		var snakes = [];
 		addSnakeToDisplay();
 		
 		function addSnakeToDisplay(){
-			snakes.push(createSnake());
+			snakes.push(createSnake()); 
 			if(snakes.length > 10) clearInterval(si);
 		}
 		var si = setInterval(addSnakeToDisplay, 3000);
