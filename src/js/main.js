@@ -201,7 +201,7 @@
         var that = {},
             ifChildrenHasTouched,
             callback,
-            numberOfChildren = 20,
+            numberOfChildren = 250,
             collection = [];
 
         /*
@@ -223,7 +223,7 @@
             ifChildrenHasTouched = _createCheckChildrenTouched(callback);
 
             _loopCollection(function(el, i) {
-                var time = 6000 + i * 500;
+                var time = 6000 + i * 50;
                 el.goto(Math.random() * window.innerWidth, Math.random() * window.innerHeight, time);
             });
         }
@@ -267,21 +267,20 @@
 
 
 
-    $(document).ready(function() {
+    // $(document).ready(function() {
 
-        var elementCollection = createElementCollection();
+    //     var elementCollection = createElementCollection();
 
-        elementCollection.setCallback(function(){
-        	setTimeout(function(){
-        		elementCollection.spreadOut();
-        	},2000)
-        });
+    //     elementCollection.setCallback(function(){
+    //     	setTimeout(function(){
+    //     		elementCollection.spreadOut();
+    //     	},2000)
+    //     });
 
-        elementCollection.init();
-        elementCollection.spreadOut(); 
+    //     elementCollection.init();
+    //     elementCollection.spreadOut(); 
 
-
-    });
+    // });
 
 
 

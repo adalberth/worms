@@ -392,3 +392,8 @@ td,
 th {
   padding: 0;
 }
+
+.snake-child:first-child {
+  background-color: red !important;
+  z-index: 1;
+}

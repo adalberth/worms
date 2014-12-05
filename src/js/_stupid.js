@@ -32,7 +32,19 @@
 
     stupid.createSingleton = createSingleton;
 
+    /*
+    * Collection Loop
+    */
+    function createCollectionLoop(collection){
+        return function(callback){
+            for (var i = 0; i < collection.length; i++) {
+                callback(collection[i],i);
+            };
+        }
+    }
 
+    stupid.createCollectionLoop = createCollectionLoop;
+    
     /*
     * REQUEST ANIMATION FRAME
     *
