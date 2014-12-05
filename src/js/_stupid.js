@@ -44,7 +44,7 @@
     }
 
     stupid.createCollectionLoop = createCollectionLoop;
-    
+
     /*
     * REQUEST ANIMATION FRAME
     *
@@ -67,6 +67,16 @@
                 }
     })();
 
+
+    /*
+    * Date now
+    */
+
+    if (!Date.now) {
+      Date.now = function now() {
+        return new Date().getTime();
+      };
+    }
 
     
     window.stupid = stupid;

@@ -393,7 +393,6 @@ th {
   padding: 0;
 }
 
-.snake-child:first-child {
-  background-color: red !important;
-  z-index: 1;
+body {
+  background-color: black;
 }

@@ -8,7 +8,9 @@
     function createTick() {
         var collection = [],
             loop = _createAnimationLoop(),
-            requestId;
+            requestId,
+            fps = 60,
+            fr = 1000 / fps;
 
         /*
          * Private
@@ -19,10 +21,16 @@
 
             return function() {
                 if (once) return;
+                var ts = Date.now();
 
                 (function _animloop() {
                     requestId = requestAnimFrame(_animloop);
                     _render();
+                    // if( (Date.now() - ts) > fr){
+                    //     ts = Date.now();
+                    //     _render();
+                    // }
+                    
                 })();
 
                 once = true;
@@ -57,6 +65,9 @@
                 var index = collection.indexOf(arguments[0]);
                 if (index > -1) collection.splice(index, 1);
                 _checkCollection();
+            },
+            getFrameRate: function(){
+                return fps;
             }
         }
     }
@@ -70,8 +81,8 @@
 
     function createDocument() {
         var $body = $('body'),
-            $window = $('window'),
-            $document = $('document');
+            $window = $(window),
+            $document = $(document);
 
         return {
             getBody: function() {
@@ -94,7 +105,7 @@
 
     function createAnimationObject() {
         var that = {parent: arguments[0]},
-            frameRate = 60,
+            frameRate = tickSingleton.getInstance().getFrameRate(),
             x = Math.random() * window.innerWidth,
             y = Math.random() * window.innerHeight,
             animationX,
@@ -171,7 +182,7 @@
 
         function _goto(endX, endY, time) {
             var randomEase = _randomEase();
-            time = parseInt(time / frameRate) || 60;
+            time = parseInt(time / frameRate) || frameRate;
 
             animationX = _animationConstructor(randomEase(), x, endX - x, time, _reset);
             animationY = _animationConstructor(randomEase(), y, endY - y, time, _reset);
@@ -201,7 +212,7 @@
         var that = {},
             ifChildrenHasTouched,
             callback,
-            numberOfChildren = 250,
+            numberOfChildren = 10,
             collection = [];
 
         /*
