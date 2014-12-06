@@ -166,21 +166,22 @@
 			var that = {};
 			var snake = [];
 			var snakePosition = [];
+			var $el = $('<div />').addClass('snake').css({
+				"background-color": '#'+Math.floor(Math.random()*16777215).toString(16)
+			});
 			var x = documentSingleton.getInstance().getDocument().width() * Math.random();
 			var y = documentSingleton.getInstance().getDocument().height() * Math.random();
 			var loop = stupid.createCollectionLoop(snake);
 			var step = 5;
-			var minDistance = Math.random() * 50 + 50;
+			var minDistance = Math.random() * 100 + 100;
 			
+			documentSingleton.getInstance().getBody().append($el);
+
 			/*
 			* Public
 			*/
 
-			that.$el = $('<div />').addClass('snake').css({
-				"background-color": '#'+Math.floor(Math.random()*16777215).toString(16)
-			});
-			documentSingleton.getInstance().getBody().append(that.$el);
-
+			that.$el = $el;
 			that.getPosition = function(){
 				return {
 					x: x,
@@ -188,9 +189,11 @@
 				}
 			};
 
+
 			/*
-			* Init
+			* Private
 			*/
+
 			_init();
 
 			function _init(){
@@ -329,24 +332,56 @@
 				return stupid.util.lineDistance(point, that.getPosition());
 			}
 
+			function _goAwayFrom(point){
+				var value = step;
+
+				if(point.x > x) x -= stupid.random.orNull(value);
+				if(point.x < x) x += stupid.random.orNull(value);
+				if(point.y > y) y -= stupid.random.orNull(value);
+				if(point.y < y) y += stupid.random.orNull(value);
+
+				_handlePosition();
+			}
+
 			function _goTowards(point){
 				var value = step;
-				if(point.x > x) x -= value;
-				if(point.x < x) x += value;
-				if(point.y > y) y -= value;
-				if(point.y < y) y += value;
+				
+				if(point.x > x) x += stupid.random.orNull(value);
+				if(point.x < x) x -= stupid.random.orNull(value);
+				if(point.y > y) y += stupid.random.orNull(value);
+				if(point.y < y) y -= stupid.random.orNull(value);
 
 				_handlePosition();
 			}
 
 
+			function _createAttraction(){
+				var count = 0;
+				var countMax = newRandom();
+				var toggle = Math.random() < 0.5 ? false : true;
+
+				function newRandom(){
+					return Math.random() * 100 + 50;
+				}
+				return function(){
+					count += 1;
+
+					if(count >= countMax){
+						toggle = !toggle;
+						countMax = newRandom();
+						count = 0;
+					}
+
+					return toggle ? _goAwayFrom : _goTowards;
+				}
+			}
 			/*
 			* Public
 			*/
 
 			that.render = _render;
 			that.distanceTo = _distanceTo;
-			that.goTowards = _goTowards;
+			that.attraction = _createAttraction();
 
 			that.getMinDistance = function(){
 				return minDistance;
@@ -407,7 +442,7 @@
 					var otherPosition = other.getPosition();
 					var dist = el.distanceTo(otherPosition);
 					if(dist < el.getMinDistance()){
-						el.goTowards(otherPosition);
+						el.attraction()(otherPosition);
 					}
 				}
 			}

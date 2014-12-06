@@ -81,6 +81,15 @@
       };
     }
 
+    /*
+    * Random
+    */
+
+    stupid.random = {};
+
+    stupid.random.orNull = function(value){
+        return Math.random() < 0.5 ? value : 0;
+    }
 
     /*
     * Util
