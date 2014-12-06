@@ -232,7 +232,7 @@
 			}
 
 			function _getNewPosition(){
-				var value = step; //Math.random() < 0.5 ? 0 : 10;
+				var value = stupid.random.nullOr(step);
 				return Math.random() < 0.5 ? value : value * -1;
 			}
 
@@ -335,10 +335,10 @@
 			function _goAwayFrom(point){
 				var value = step;
 
-				if(point.x > x) x -= stupid.random.orNull(value);
-				if(point.x < x) x += stupid.random.orNull(value);
-				if(point.y > y) y -= stupid.random.orNull(value);
-				if(point.y < y) y += stupid.random.orNull(value);
+				if(point.x > x) x -= stupid.random.nullOr(value);
+				if(point.x < x) x += stupid.random.nullOr(value);
+				if(point.y > y) y -= stupid.random.nullOr(value);
+				if(point.y < y) y += stupid.random.nullOr(value);
 
 				_handlePosition();
 			}
@@ -346,10 +346,10 @@
 			function _goTowards(point){
 				var value = step;
 				
-				if(point.x > x) x += stupid.random.orNull(value);
-				if(point.x < x) x -= stupid.random.orNull(value);
-				if(point.y > y) y += stupid.random.orNull(value);
-				if(point.y < y) y -= stupid.random.orNull(value);
+				if(point.x > x) x += stupid.random.nullOr(value);
+				if(point.x < x) x -= stupid.random.nullOr(value);
+				if(point.y > y) y += stupid.random.nullOr(value);
+				if(point.y < y) y -= stupid.random.nullOr(value);
 
 				_handlePosition();
 			}
