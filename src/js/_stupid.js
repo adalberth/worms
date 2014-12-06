@@ -87,7 +87,7 @@
 
     stupid.random = {};
 
-    stupid.random.orNull = function(value){
+    stupid.random.nullOr = function(value){
         return Math.random() < 0.5 ? value : 0;
     }
 
