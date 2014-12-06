@@ -1,163 +1,7 @@
 (function($){
-	$(document).ready(function(){
-
-
-		
-
-		/*
-	     * Tick
-	     */
-
-	    function createTick() {
-	        var collection = [],
-	            loop = _createAnimationLoop(),
-	            requestId,
-	            fps = 30,
-	            fr = 1000 / fps;
-
-	        /*
-	         * Private
-	         */
-
-	        function _createAnimationLoop() {
-	            var once = false;
-
-	            return function() {
-	                if (once) return;
-	                var ts = Date.now();
-
-	                (function _animloop() {
-	                    requestId = requestAnimFrame(_animloop);
-	                    // _render();
-	                    if( (Date.now() - ts) > fr){
-	                        ts = Date.now();
-	                        _render(); 
-	                    }
-	                    
-	                })();
-
-	                once = true;
-	            }
-	        }
-
-	        function _render() {
-	            for (var i = 0; i < collection.length; i++) {
-	                collection[i].callback();
-	            };
-	        }
-
-	        function _checkCollection() {
-	            if (collection.length > 0 && collection.length < 2) {
-	                loop();
-	            } else if (collection.length === 0) {
-	                cancelAnimFrame(requestId);
-	                loop = _createAnimationLoop();
-	            }
-	        }
-
-	        /*
-	         * Public
-	         */
-	        return {
-	            add: function() {
-	                var index = collection.indexOf(arguments[0]);
-	                if (index === -1) collection.push(arguments[0]);
-	                _checkCollection();
-	            },
-	            remove: function() {
-	                var index = collection.indexOf(arguments[0]);
-	                if (index > -1) collection.splice(index, 1);
-	                _checkCollection();
-	            },
-	            getFrameRate: function(){
-	                return fps;
-	            }
-	        }
-	    }
-
-	    var tickSingleton = stupid.createSingleton(createTick);
-
-		/*
-	     * Document Elements
-	     */
-
-	    function createDocument() {
-	        var $body = $('body'),
-	            $window = $(window),
-	            $document = $(document);
-
-	        return {
-	            getBody: function() {
-	                return $body;
-	            },
-	            getWindow: function() {
-	                return $window;
-	            },
-	            getDocument: function() {
-	                return $document;
-	            },
-	        }
-	    }
-
-	    var documentSingleton = stupid.createSingleton(createDocument);
-	    
-
-
-
-
-	    /*
-		* Snake Part
-		*/
-
-		function createSnakePart(){
-		 	var that = {};
-		 	var parent = arguments[0];
-		 	var $parent = arguments[0].$el;
-		 	var $el = _createHtmlElement();
-		 	var el = $el[0];
-		 	
-		 	_addToDisplay($el);
-
-		 	function _createHtmlElement() {
-		 		var pos = parent.getPosition();
-				return $('<div />').addClass('snake-child').css({
-					"position":"absolute",
-					"background-color":'inherit',
-					"width":"10px",
-					"height":"10px",
-					"opacity": "0",
-					"transform":"translateX("+pos.x+"px) translateY("+pos.y+"px)"
-				});
-			};
-
-			function _addToDisplay(el){
-				$parent.append(el);
-			}
-
-			/*
-			* Public
-			*/
-
-			that.getPosition = function() {
-				var pos = el.getBoundingClientRect()
-				return {
-					x: pos.left,
-					y: pos.top
-				}
-			};
-
-			that.setPosition = function(x,y) {
-				el.style["transform"] = "translateX("+x+"px) translateY("+y+"px) translateZ(0px)";
-			};
-
-			that.setOpacity = function(value){
-				el.style["opacity"] = value;
-			}
-
-		 	return that;
-		}
-
-
+		var singleton = require('./singleton');
+		var stupid = require('./stupid');
+		var createSnakePart = require('./snake_part');
 
 	    /*
 	    * Snake
@@ -166,22 +10,19 @@
 			var that = {};
 			var snake = [];
 			var snakePosition = [];
-			var $el = $('<div />').addClass('snake').css({
-				"background-color": '#'+Math.floor(Math.random()*16777215).toString(16)
-			});
-			var x = documentSingleton.getInstance().getDocument().width() * Math.random();
-			var y = documentSingleton.getInstance().getDocument().height() * Math.random();
+
+			var x = window.innerWidth * Math.random();
+			var y = window.innerHeight * Math.random();
 			var loop = stupid.createCollectionLoop(snake);
 			var step = 5;
 			var minDistance = Math.random() * 100 + 100;
-			
-			documentSingleton.getInstance().getBody().append($el);
 
 			/*
 			* Public
 			*/
 
-			that.$el = $el;
+			that.color = stupid.random.rgbColorObject();
+			that.dim = 10;
 			that.getPosition = function(){
 				return {
 					x: x,
@@ -198,10 +39,8 @@
 
 			function _init(){
 				_body();
-				
-				//tickSingleton.getInstance().add({callback:_render})
-				
 			}
+
 			function _body(){
 				var maxBodyLength = Math.random() * 20 + 20
 				_buildBody(1);
@@ -238,8 +77,8 @@
 
 			function _update(){
 				var pos = _potentialPosition();
-				x = pos.x;
-				y = pos.y;
+				x = parseInt(pos.x);
+				y = parseInt(pos.y);
 			}
 
 			function _potentialPosition(){
@@ -291,8 +130,8 @@
 			}
 
 			function _positionBounderies(){
-				var width = documentSingleton.getInstance().getWindow().width();
-				var height = documentSingleton.getInstance().getWindow().height();
+				var width = window.innerWidth;
+				var height = window.innerHeight;
 
 				if(x < 0){
 					x = width;
@@ -312,7 +151,9 @@
 				function loopFunction(el,i){
 					var opacity = Math.pow(snakeLength / (i + 1), 2) / 10;
 					if(i === 0) opacity = 1;
-					el.setOpacity(opacity);
+					opacity = parseInt(opacity * 10) / 10;
+					opacity = opacity > 1 ? 1 : opacity;
+					el.setOpacity( opacity );
 				}
 				loop(loopFunction);
 			}
@@ -390,73 +231,6 @@
 			return that;
 		}
 
+		module.exports = createSnake; 
 
-		/*
-		* Snake Collection
-		*/
-
-		function createSnakeCollection(){
-			var that = {};
-			var snakes = [];
-			var loop = stupid.createCollectionLoop(snakes);
-			var numberOfSnakes = 20;
-			var delayBetweenSnakes = 0;
-
-			_init();
-
-			function _init(){
-				_addSnakes();
-				tickSingleton.getInstance().add({
-					callback:_render
-				});				
-			}
-			
-			function _addSnakes(){
-				addSnakeToDisplay();
-
-				function addSnakeToDisplay(){
-					snakes.push(createSnake()); 
-					if(snakes.length > numberOfSnakes - 1) clearInterval(si);
-				}
-
-				var si = setInterval(addSnakeToDisplay, delayBetweenSnakes);
-			}
-			function _draw(){
-				loop(loopFunction);
-				function loopFunction(el,i){
-					el.render();
-				}
-			}
-
-			function _checkSnakesDistance(){
-
-				loop(loopFunctionOuter);
-
-				function loopFunctionOuter(el,i){
-					loop(loopFunctionInner,el);
-				}
-
-				function loopFunctionInner(el,i,args){
-					var other = args[0];
-					if(el === other) return;
-					var otherPosition = other.getPosition();
-					var dist = el.distanceTo(otherPosition);
-					if(dist < el.getMinDistance()){
-						el.attraction()(otherPosition);
-					}
-				}
-			}
-
-			function _render(){
-				_draw();
-				_checkSnakesDistance();
-			}
-
-		 	return that;
-		}
-
-
-		var snakeNest = createSnakeCollection();
-
-	});
 }(jQuery))

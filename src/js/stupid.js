@@ -1,6 +1,6 @@
 (function(){
 
-    var stupid = window.stupid || {};
+    var stupid = {};
 
 
     /*
@@ -91,6 +91,24 @@
         return Math.random() < 0.5 ? value : 0;
     }
 
+    stupid.random.rgbColorObject = function(){
+        function c() {
+           return parseInt(Math.random()*256);
+        }
+
+        return {
+            r:c(), 
+            g:c(), 
+            b:c()
+        };
+    }
+
+    stupid.random.rgbColor = function(){
+        var rgb = stupid.random.rgbColorObject();
+
+        return "rgba("+rgb.r+","+rgb.g+","+rgb.g+",1);";
+    }
+
     /*
     * Util
     */
@@ -110,6 +128,6 @@
       return Math.sqrt( xs + ys );
     }
     
-    window.stupid = stupid;
+    module.exports = stupid;
 
 }())
