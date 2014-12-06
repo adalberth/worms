@@ -37,8 +37,11 @@
     */
     function createCollectionLoop(collection){
         return function(callback){
+            var args = Array.prototype.slice.call(arguments);
+            args.shift();
+
             for (var i = 0; i < collection.length; i++) {
-                callback(collection[i],i);
+                callback(collection[i], i, args);
             };
         }
     }
@@ -78,6 +81,34 @@
       };
     }
 
+    /*
+    * Random
+    */
+
+    stupid.random = {};
+
+    stupid.random.orNull = function(value){
+        return Math.random() < 0.5 ? value : 0;
+    }
+
+    /*
+    * Util
+    */
+
+    stupid.util = {};
+
+    stupid.util.lineDistance = function( point1, point2 ){
+      var xs = 0;
+      var ys = 0;
+     
+      xs = point2.x - point1.x;
+      xs = xs * xs;
+     
+      ys = point2.y - point1.y;
+      ys = ys * ys;
+     
+      return Math.sqrt( xs + ys );
+    }
     
     window.stupid = stupid;
 
