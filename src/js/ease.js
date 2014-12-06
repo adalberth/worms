@@ -226,4 +226,6 @@
         return c / 2 * (Math.sqrt(1 - t * t) + 1) + b;
     };
 
+
+    module.exports = Ease;
 }())

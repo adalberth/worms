@@ -8,6 +8,8 @@ var gulp = 			require('gulp'),
 	livereload = 	require('gulp-livereload'),
 	cssGlobbing = 	require('gulp-css-globbing'),
 	stylish = 		require('jshint-stylish'),
+	browserify = 	require('browserify'),
+	source = 		require('vinyl-source-stream'),
 	fs = 			require('fs'),
 	_ = 			require('lodash');
 
@@ -15,7 +17,7 @@ var gulp = 			require('gulp'),
 // Settings
 var settings = {
 	build: './_',
-	source: 'src'
+	source: './src'
 };
 
 // Bowers Comprees Libs
@@ -34,11 +36,19 @@ gulp.task('lint', function () {
 // Minify js files
 gulp.task('js', function () {
 	'use strict';
-	gulp.src([settings.source + '/js/**/*.js'])
-		.pipe(uglify('main.min.js', {
-			outSourceMap: true,
-		}))
-		.on('error', gutil.log)
+	// gulp.src([settings.source + '/js/**/*.js'])
+	// 	.pipe(uglify('main.min.js', {
+	// 		outSourceMap: true,
+	// 	}))
+	// 	.on('error', gutil.log)
+	// 	.pipe(gulp.dest(settings.build + '/js'));
+
+	 return browserify(settings.source + '/js/app.js')
+        .bundle()
+        //Pass desired output filename to vinyl-source-stream
+        .pipe(source('main.js'))
+        // Start piping stream to tasks!
+        .on('error', gutil.log)
 		.pipe(gulp.dest(settings.build + '/js'));
 });
 

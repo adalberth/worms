@@ -1,6 +1,6 @@
 (function(){
 
-    var stupid = window.stupid || {};
+    var stupid = {};
 
 
     /*
@@ -110,6 +110,6 @@
       return Math.sqrt( xs + ys );
     }
     
-    window.stupid = stupid;
+    module.exports = stupid;
 
 }())
