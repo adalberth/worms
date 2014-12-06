@@ -8,22 +8,22 @@
 	var createSnake = require('./snake');  
 	var singleton = require('./singleton');  
 
-	function createSnakeCollection(){
+	function createSnakeCollection(opts){
+		var opts = $.extend(true,{
+			numberOfSnakes: 20,
+			delayBetweenSnakes:0
+		},opts);
+
 		var that = {};
 		var snakes = [];
 		var loop = stupid.createCollectionLoop(snakes);
-		var numberOfSnakes = 20;
-		var delayBetweenSnakes = 0;
-		var identify = { callback:_render};
+		var identify = { callback:_render };
+
 		_init();
 
 		function _init(){
 			_addSnakes();
 			singleton.tick.getInstance().add(identify);	
-
-			// setTimeout(function(){
-			// 	tickSingleton.getInstance().remove(identify);	
-			// },1000);			
 		}
 		
 		function _addSnakes(){
@@ -31,10 +31,10 @@
 
 			function addSnakeToDisplay(){
 				snakes.push(createSnake()); 
-				if(snakes.length > numberOfSnakes - 1) clearInterval(si);
+				if(snakes.length > opts.numberOfSnakes - 2) clearInterval(si);
 			}
 
-			var si = setInterval(addSnakeToDisplay, delayBetweenSnakes);
+			var si = setInterval(addSnakeToDisplay, opts.delayBetweenSnakes);
 		}
 		function _draw(){
 			loop(loopFunction);
@@ -63,6 +63,7 @@
 		}
 
 		function _render(){
+			singleton.canvas.getInstance().clear();
 			_draw();
 			_checkSnakesDistance();
 		}

@@ -5,12 +5,67 @@
 
 	$(document).ready(function(){
 		singleton.init();
-		var snakeCollection = createSnakeCollection();
+
+		var numberOfSnakes = window.innerWidth / 40;
+		
+		var snakeCollection = createSnakeCollection({
+			numberOfSnakes: numberOfSnakes,
+			delayBetweenSnakes:0
+		});
 	});	
 
 }())
 
-},{"./singleton":3,"./snake_collection":5}],2:[function(require,module,exports){
+},{"./singleton":4,"./snake_collection":6}],2:[function(require,module,exports){
+(function(){
+	
+	var singleton = require('./singleton');
+
+	function createCanvas(){
+	 	that = {};
+
+	 	var canvas = document.getElementById('canvas');
+	 	var ctx = canvas.getContext('2d');
+
+	 	_init();
+
+	 	function _init(){
+	 		_resize();
+	 		window.addEventListener('resize', _resize, false);
+	 	}
+
+	 	function _resize(){
+	 		canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+	 	}
+
+	 	that.save = function(){
+	 		ctx.save();
+	 	}
+
+	 	that.restore = function(){
+	 		ctx.restore();
+	 	}
+
+	 	that.clear = function(){
+	 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	 	}
+
+	 	that.getCanvas = function(){
+	 		return canvas;
+	 	}
+
+	 	that.getCtx = function(){
+	 		return ctx;
+	 	}
+
+	 	return that;
+	}
+
+	module.exports = createCanvas;
+
+}())
+},{"./singleton":4}],3:[function(require,module,exports){
 (function(){
 
 	/*
@@ -42,23 +97,25 @@
     module.exports = createDocument; 
 
 }())
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function(){
 	var stupid = require('./stupid');
 	
 	var createDocument = require('./document');
 	var createTick = require('./tick');
+	var createCanvas = require('./canvas');
 	
 	var singleton = {
 		init:function(){
 			this.document = stupid.createSingleton(createDocument);
 			this.tick = stupid.createSingleton(createTick);
+			this.canvas = stupid.createSingleton(createCanvas);
 		}
 	}; 
 
 	module.exports = singleton;
 }())
-},{"./document":2,"./stupid":7,"./tick":8}],4:[function(require,module,exports){
+},{"./canvas":2,"./document":3,"./stupid":8,"./tick":9}],5:[function(require,module,exports){
 (function($){
 		var singleton = require('./singleton');
 		var stupid = require('./stupid');
@@ -71,23 +128,18 @@
 			var that = {};
 			var snake = [];
 			var snakePosition = [];
-			var $el = $('<div />').addClass('snake').css({
-				"background-color": '#'+Math.floor(Math.random()*16777215).toString(16)
-			});
 
-			var x = singleton.document.getInstance().getDocument().width() * Math.random();
-			var y = singleton.document.getInstance().getDocument().height() * Math.random();
+			var x = window.innerWidth * Math.random();
+			var y = window.innerHeight * Math.random();
 			var loop = stupid.createCollectionLoop(snake);
 			var step = 5;
 			var minDistance = Math.random() * 100 + 100;
-			
-			singleton.document.getInstance().getCanvasDiv().append($el);
 
 			/*
 			* Public
 			*/
 
-			that.$el = $el;
+			that.color = stupid.random.rgbColorObject();
 			that.getPosition = function(){
 				return {
 					x: x,
@@ -104,10 +156,8 @@
 
 			function _init(){
 				_body();
-				
-				//tickSingleton.getInstance().add({callback:_render})
-				
 			}
+
 			function _body(){
 				var maxBodyLength = Math.random() * 20 + 20
 				_buildBody(1);
@@ -197,8 +247,8 @@
 			}
 
 			function _positionBounderies(){
-				var width = singleton.document.getInstance().getWindow().width();
-				var height = singleton.document.getInstance().getWindow().height();
+				var width = window.innerWidth;
+				var height = window.innerHeight;
 
 				if(x < 0){
 					x = width;
@@ -218,7 +268,8 @@
 				function loopFunction(el,i){
 					var opacity = Math.pow(snakeLength / (i + 1), 2) / 10;
 					if(i === 0) opacity = 1;
-					el.setOpacity(opacity);
+					opacity = parseInt(opacity * 100) / 100;
+					el.setOpacity( opacity );
 				}
 				loop(loopFunction);
 			}
@@ -300,7 +351,7 @@
 
 }(jQuery))
 
-},{"./singleton":3,"./snake_part":6,"./stupid":7}],5:[function(require,module,exports){
+},{"./singleton":4,"./snake_part":7,"./stupid":8}],6:[function(require,module,exports){
 (function(){
 	/*
 	* Snake Collection
@@ -311,22 +362,22 @@
 	var createSnake = require('./snake');  
 	var singleton = require('./singleton');  
 
-	function createSnakeCollection(){
+	function createSnakeCollection(opts){
+		var opts = $.extend(true,{
+			numberOfSnakes: 20,
+			delayBetweenSnakes:0
+		},opts);
+
 		var that = {};
 		var snakes = [];
 		var loop = stupid.createCollectionLoop(snakes);
-		var numberOfSnakes = 20;
-		var delayBetweenSnakes = 0;
-		var identify = { callback:_render};
+		var identify = { callback:_render };
+
 		_init();
 
 		function _init(){
 			_addSnakes();
 			singleton.tick.getInstance().add(identify);	
-
-			// setTimeout(function(){
-			// 	tickSingleton.getInstance().remove(identify);	
-			// },1000);			
 		}
 		
 		function _addSnakes(){
@@ -334,10 +385,10 @@
 
 			function addSnakeToDisplay(){
 				snakes.push(createSnake()); 
-				if(snakes.length > numberOfSnakes - 1) clearInterval(si);
+				if(snakes.length > opts.numberOfSnakes - 2) clearInterval(si);
 			}
 
-			var si = setInterval(addSnakeToDisplay, delayBetweenSnakes);
+			var si = setInterval(addSnakeToDisplay, opts.delayBetweenSnakes);
 		}
 		function _draw(){
 			loop(loopFunction);
@@ -366,6 +417,7 @@
 		}
 
 		function _render(){
+			singleton.canvas.getInstance().clear();
 			_draw();
 			_checkSnakesDistance();
 		}
@@ -375,8 +427,10 @@
 
 	module.exports = createSnakeCollection; 
 }())
-},{"./singleton":3,"./snake":4,"./stupid":7}],6:[function(require,module,exports){
+},{"./singleton":4,"./snake":5,"./stupid":8}],7:[function(require,module,exports){
 (function(){
+
+	var singleton = require('./singleton');
 	/*
 	* Snake Part
 	*/
@@ -384,67 +438,49 @@
 	function createSnakePart(){
 	 	var that = {};
 	 	var parent = arguments[0];
-	 	var $parent = arguments[0].$el;
-	 	var $el = _createHtmlElement();
-	 	var el = $el[0];
-	 	
-	 	_addToDisplay($el);
+	 	var color = parent.color;
+	 	var opacity = 1;
+	 	var ctx = singleton.canvas.getInstance().getCtx();
 
-	 	function _createHtmlElement() {
-	 		var pos = parent.getPosition();
-			return $('<div />').addClass('snake-child').css({
-				"position":"absolute",
-				"background-color":'inherit',
-				"width":"10px",
-				"height":"10px",
-				"opacity": "0",
-				"transform":"translateX("+pos.x+"px) translateY("+pos.y+"px)"
-			});
-		};
+	 	var x = parent.getPosition().x;
+	 	var y = parent.getPosition().y; 
+	 	var width = 10;
+	 	var height = 10;
 
-		function _addToDisplay(el){
-			$parent.append(el);
-		}
-
+		function _draw(){
+			ctx.fillStyle = 'rgba('+color.r+','+color.g+','+color.b+','+opacity+')';
+			ctx.fillRect(x,y,width,height);
+		} 
 		/*
 		* Public
 		*/
 
 		that.getPosition = function() {
-			var pos = el.getBoundingClientRect()
-
-			// var st = window.getComputedStyle(el, null);
-			// var tr = st.getPropertyValue("-webkit-transform") ||
-			//          st.getPropertyValue("-moz-transform") ||
-			//          st.getPropertyValue("-ms-transform") ||
-			//          st.getPropertyValue("-o-transform") ||
-			//          st.getPropertyValue("transform") ||
-			//          "Either no transform set, or browser doesn't do getComputedStyle";
-
-			// var values = tr.match(/\d+(\.\d+)?/ig);
-			// var left = parseInt(values[4]);
-			// var top = parseInt(values[5]);
 
 			return {
-				x: pos.left,
-				y: pos.top
+				x: x, 
+				y: y
 			}
 		};
 
-		that.setPosition = function(x,y) {
-			el.style["transform"] = "translateX("+x+"px) translateY("+y+"px) translateZ(0px)"; 
+		that.setPosition = function(_x,_y) {
+			x = _x;
+			y = _y;
+			_draw();
 		};
 
 		that.setOpacity = function(value){
-			el.style["opacity"] = value;
+			opacity = value;
 		}
+
+
 
 	 	return that;
 	}
 
 	module.exports = createSnakePart; 
 }())
-},{}],7:[function(require,module,exports){
+},{"./singleton":4}],8:[function(require,module,exports){
 (function(){
 
     var stupid = {};
@@ -538,6 +574,24 @@
         return Math.random() < 0.5 ? value : 0;
     }
 
+    stupid.random.rgbColorObject = function(){
+        function c() {
+           return parseInt(Math.random()*256);
+        }
+
+        return {
+            r:c(), 
+            g:c(), 
+            b:c()
+        };
+    }
+
+    stupid.random.rgbColor = function(){
+        var rgb = stupid.random.rgbColorObject();
+
+        return "rgba("+rgb.r+","+rgb.g+","+rgb.g+",1);";
+    }
+
     /*
     * Util
     */
@@ -560,7 +614,7 @@
     module.exports = stupid;
 
 }())
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function(){
 
 	/*

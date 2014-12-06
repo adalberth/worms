@@ -10,23 +10,18 @@
 			var that = {};
 			var snake = [];
 			var snakePosition = [];
-			var $el = $('<div />').addClass('snake').css({
-				"background-color": '#'+Math.floor(Math.random()*16777215).toString(16)
-			});
 
-			var x = singleton.document.getInstance().getDocument().width() * Math.random();
-			var y = singleton.document.getInstance().getDocument().height() * Math.random();
+			var x = window.innerWidth * Math.random();
+			var y = window.innerHeight * Math.random();
 			var loop = stupid.createCollectionLoop(snake);
 			var step = 5;
 			var minDistance = Math.random() * 100 + 100;
-			
-			singleton.document.getInstance().getCanvasDiv().append($el);
 
 			/*
 			* Public
 			*/
 
-			that.$el = $el;
+			that.color = stupid.random.rgbColorObject();
 			that.getPosition = function(){
 				return {
 					x: x,
@@ -43,10 +38,8 @@
 
 			function _init(){
 				_body();
-				
-				//tickSingleton.getInstance().add({callback:_render})
-				
 			}
+
 			function _body(){
 				var maxBodyLength = Math.random() * 20 + 20
 				_buildBody(1);
@@ -136,8 +129,8 @@
 			}
 
 			function _positionBounderies(){
-				var width = singleton.document.getInstance().getWindow().width();
-				var height = singleton.document.getInstance().getWindow().height();
+				var width = window.innerWidth;
+				var height = window.innerHeight;
 
 				if(x < 0){
 					x = width;
@@ -157,7 +150,8 @@
 				function loopFunction(el,i){
 					var opacity = Math.pow(snakeLength / (i + 1), 2) / 10;
 					if(i === 0) opacity = 1;
-					el.setOpacity(opacity);
+					opacity = parseInt(opacity * 100) / 100;
+					el.setOpacity( opacity );
 				}
 				loop(loopFunction);
 			}

@@ -1,4 +1,6 @@
 (function(){
+
+	var singleton = require('./singleton');
 	/*
 	* Snake Part
 	*/
@@ -6,60 +8,42 @@
 	function createSnakePart(){
 	 	var that = {};
 	 	var parent = arguments[0];
-	 	var $parent = arguments[0].$el;
-	 	var $el = _createHtmlElement();
-	 	var el = $el[0];
-	 	
-	 	_addToDisplay($el);
+	 	var color = parent.color;
+	 	var opacity = 1;
+	 	var ctx = singleton.canvas.getInstance().getCtx();
 
-	 	function _createHtmlElement() {
-	 		var pos = parent.getPosition();
-			return $('<div />').addClass('snake-child').css({
-				"position":"absolute",
-				"background-color":'inherit',
-				"width":"10px",
-				"height":"10px",
-				"opacity": "0",
-				"transform":"translateX("+pos.x+"px) translateY("+pos.y+"px)"
-			});
-		};
+	 	var x = parent.getPosition().x;
+	 	var y = parent.getPosition().y; 
+	 	var width = 10;
+	 	var height = 10;
 
-		function _addToDisplay(el){
-			$parent.append(el);
-		}
-
+		function _draw(){
+			ctx.fillStyle = 'rgba('+color.r+','+color.g+','+color.b+','+opacity+')';
+			ctx.fillRect(x,y,width,height);
+		} 
 		/*
 		* Public
 		*/
 
 		that.getPosition = function() {
-			var pos = el.getBoundingClientRect()
-
-			// var st = window.getComputedStyle(el, null);
-			// var tr = st.getPropertyValue("-webkit-transform") ||
-			//          st.getPropertyValue("-moz-transform") ||
-			//          st.getPropertyValue("-ms-transform") ||
-			//          st.getPropertyValue("-o-transform") ||
-			//          st.getPropertyValue("transform") ||
-			//          "Either no transform set, or browser doesn't do getComputedStyle";
-
-			// var values = tr.match(/\d+(\.\d+)?/ig);
-			// var left = parseInt(values[4]);
-			// var top = parseInt(values[5]);
 
 			return {
-				x: pos.left,
-				y: pos.top
+				x: x, 
+				y: y
 			}
 		};
 
-		that.setPosition = function(x,y) {
-			el.style["transform"] = "translateX("+x+"px) translateY("+y+"px) translateZ(0px)"; 
+		that.setPosition = function(_x,_y) {
+			x = _x;
+			y = _y;
+			_draw();
 		};
 
 		that.setOpacity = function(value){
-			el.style["opacity"] = value;
+			opacity = value;
 		}
+
+
 
 	 	return that;
 	}
