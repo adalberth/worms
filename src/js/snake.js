@@ -399,7 +399,7 @@
 			var that = {};
 			var snakes = [];
 			var loop = stupid.createCollectionLoop(snakes);
-			var numberOfSnakes = 10;
+			var numberOfSnakes = 20;
 			var delayBetweenSnakes = 0;
 
 			_init();
