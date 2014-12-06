@@ -84,7 +84,8 @@
 	    function createDocument() {
 	        var $body = $('body'),
 	            $window = $(window),
-	            $document = $(document);
+	            $document = $(document),
+	            $canvasdiv = $('.canvas');
 
 	        return {
 	            getBody: function() {
@@ -95,6 +96,9 @@
 	            },
 	            getDocument: function() {
 	                return $document;
+	            },
+	            getCanvasDiv: function() {
+	                return $canvasdiv;
 	            },
 	        }
 	    }
@@ -140,6 +144,19 @@
 
 			that.getPosition = function() {
 				var pos = el.getBoundingClientRect()
+
+				// var st = window.getComputedStyle(el, null);
+				// var tr = st.getPropertyValue("-webkit-transform") ||
+				//          st.getPropertyValue("-moz-transform") ||
+				//          st.getPropertyValue("-ms-transform") ||
+				//          st.getPropertyValue("-o-transform") ||
+				//          st.getPropertyValue("transform") ||
+				//          "Either no transform set, or browser doesn't do getComputedStyle";
+
+				// var values = tr.match(/\d+(\.\d+)?/ig);
+				// var left = parseInt(values[4]);
+				// var top = parseInt(values[5]);
+
 				return {
 					x: pos.left,
 					y: pos.top
@@ -147,7 +164,7 @@
 			};
 
 			that.setPosition = function(x,y) {
-				el.style["transform"] = "translateX("+x+"px) translateY("+y+"px) translateZ(0px)";
+				el.style["transform"] = "translateX("+x+"px) translateY("+y+"px) translateZ(0px)"; 
 			};
 
 			that.setOpacity = function(value){
@@ -175,7 +192,7 @@
 			var step = 5;
 			var minDistance = Math.random() * 100 + 100;
 			
-			documentSingleton.getInstance().getBody().append($el);
+			documentSingleton.getInstance().getCanvasDiv().append($el);
 
 			/*
 			* Public
@@ -401,14 +418,16 @@
 			var loop = stupid.createCollectionLoop(snakes);
 			var numberOfSnakes = 20;
 			var delayBetweenSnakes = 0;
-
+			var identify = { callback:_render};
 			_init();
 
 			function _init(){
 				_addSnakes();
-				tickSingleton.getInstance().add({
-					callback:_render
-				});				
+				tickSingleton.getInstance().add(identify);	
+
+				// setTimeout(function(){
+				// 	tickSingleton.getInstance().remove(identify);	
+				// },1000);			
 			}
 			
 			function _addSnakes(){
