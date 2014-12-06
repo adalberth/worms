@@ -14,12 +14,14 @@
 
 	 	var x = parent.getPosition().x;
 	 	var y = parent.getPosition().y; 
-	 	var width = 10;
-	 	var height = 10;
+	 	var width = parent.dim;
+	 	var height = parent.dim;
 
 		function _draw(){
+			ctx.save();
 			ctx.fillStyle = 'rgba('+color.r+','+color.g+','+color.b+','+opacity+')';
 			ctx.fillRect(x,y,width,height);
+			ctx.restore();
 		} 
 		/*
 		* Public

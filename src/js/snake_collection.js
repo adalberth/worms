@@ -30,8 +30,12 @@
 			addSnakeToDisplay();
 
 			function addSnakeToDisplay(){
-				snakes.push(createSnake()); 
-				if(snakes.length > opts.numberOfSnakes - 2) clearInterval(si);
+				if(snakes.length > opts.numberOfSnakes - 1){
+					clearInterval(si);
+				}else{
+					snakes.push(createSnake()); 
+				}
+
 			}
 
 			var si = setInterval(addSnakeToDisplay, opts.delayBetweenSnakes);
@@ -66,6 +70,7 @@
 			singleton.canvas.getInstance().clear();
 			_draw();
 			_checkSnakesDistance();
+			singleton.canvas.getInstance().update();
 		}
 
 	 	return that;

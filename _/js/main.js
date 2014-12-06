@@ -7,7 +7,7 @@
 		singleton.init();
 
 		var numberOfSnakes = window.innerWidth / 40;
-		
+
 		var snakeCollection = createSnakeCollection({
 			numberOfSnakes: numberOfSnakes,
 			delayBetweenSnakes:0
@@ -24,31 +24,31 @@
 	function createCanvas(){
 	 	that = {};
 
+
 	 	var canvas = document.getElementById('canvas');
+	 	var preCanvas = document.createElement('canvas');
+
+	 	_resize();
+
 	 	var ctx = canvas.getContext('2d');
+	 	var preCtx = preCanvas.getContext('2d');
 
-	 	_init();
-
-	 	function _init(){
-	 		_resize();
-	 		window.addEventListener('resize', _resize, false);
-	 	}
+ 		window.addEventListener('resize', _resize, false);
 
 	 	function _resize(){
 	 		canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+
+            preCanvas.width = window.innerWidth;
+            preCanvas.height = window.innerHeight;
 	 	}
 
-	 	that.save = function(){
-	 		ctx.save();
-	 	}
-
-	 	that.restore = function(){
-	 		ctx.restore();
+	 	function _clear(){
+	 		this.clearRect(0, 0, canvas.width, canvas.height);
 	 	}
 
 	 	that.clear = function(){
-	 		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	 		_clear.call(preCtx);
 	 	}
 
 	 	that.getCanvas = function(){
@@ -56,7 +56,12 @@
 	 	}
 
 	 	that.getCtx = function(){
-	 		return ctx;
+	 		return preCtx;
+	 	}
+
+	 	that.update = function(){
+	 		_clear.call(ctx);
+	 		ctx.drawImage(preCanvas, 0, 0);
 	 	}
 
 	 	return that;
@@ -140,6 +145,7 @@
 			*/
 
 			that.color = stupid.random.rgbColorObject();
+			that.dim = 10;
 			that.getPosition = function(){
 				return {
 					x: x,
@@ -194,8 +200,8 @@
 
 			function _update(){
 				var pos = _potentialPosition();
-				x = pos.x;
-				y = pos.y;
+				x = parseInt(pos.x);
+				y = parseInt(pos.y);
 			}
 
 			function _potentialPosition(){
@@ -268,7 +274,8 @@
 				function loopFunction(el,i){
 					var opacity = Math.pow(snakeLength / (i + 1), 2) / 10;
 					if(i === 0) opacity = 1;
-					opacity = parseInt(opacity * 100) / 100;
+					opacity = parseInt(opacity * 10) / 10;
+					opacity = opacity > 1 ? 1 : opacity;
 					el.setOpacity( opacity );
 				}
 				loop(loopFunction);
@@ -384,8 +391,12 @@
 			addSnakeToDisplay();
 
 			function addSnakeToDisplay(){
-				snakes.push(createSnake()); 
-				if(snakes.length > opts.numberOfSnakes - 2) clearInterval(si);
+				if(snakes.length > opts.numberOfSnakes - 1){
+					clearInterval(si);
+				}else{
+					snakes.push(createSnake()); 
+				}
+
 			}
 
 			var si = setInterval(addSnakeToDisplay, opts.delayBetweenSnakes);
@@ -420,6 +431,7 @@
 			singleton.canvas.getInstance().clear();
 			_draw();
 			_checkSnakesDistance();
+			singleton.canvas.getInstance().update();
 		}
 
 	 	return that;
@@ -444,12 +456,14 @@
 
 	 	var x = parent.getPosition().x;
 	 	var y = parent.getPosition().y; 
-	 	var width = 10;
-	 	var height = 10;
+	 	var width = parent.dim;
+	 	var height = parent.dim;
 
 		function _draw(){
+			ctx.save();
 			ctx.fillStyle = 'rgba('+color.r+','+color.g+','+color.b+','+opacity+')';
 			ctx.fillRect(x,y,width,height);
+			ctx.restore();
 		} 
 		/*
 		* Public

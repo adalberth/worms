@@ -22,6 +22,7 @@
 			*/
 
 			that.color = stupid.random.rgbColorObject();
+			that.dim = 10;
 			that.getPosition = function(){
 				return {
 					x: x,
@@ -76,8 +77,8 @@
 
 			function _update(){
 				var pos = _potentialPosition();
-				x = pos.x;
-				y = pos.y;
+				x = parseInt(pos.x);
+				y = parseInt(pos.y);
 			}
 
 			function _potentialPosition(){
@@ -150,7 +151,8 @@
 				function loopFunction(el,i){
 					var opacity = Math.pow(snakeLength / (i + 1), 2) / 10;
 					if(i === 0) opacity = 1;
-					opacity = parseInt(opacity * 100) / 100;
+					opacity = parseInt(opacity * 10) / 10;
+					opacity = opacity > 1 ? 1 : opacity;
 					el.setOpacity( opacity );
 				}
 				loop(loopFunction);
